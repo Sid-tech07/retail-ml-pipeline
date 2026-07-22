@@ -1,0 +1,18 @@
+[
+  "num_transactions",
+  "num_unique_invoices",
+  "avg_transaction_amount",
+  "max_transaction_amount",
+  "min_transaction_amount",
+  "std_transaction_amount",
+  "median_transaction",
+  "max_price",
+  "days_since_last_purchase",
+  "customer_lifetime_days",
+  "purchase_frequency_days",
+  "num_unique_products",
+  "num_unique_descriptions",
+  "avg_items_per_invoice",
+  "high_value_ratio",
+  "m_score"
+]

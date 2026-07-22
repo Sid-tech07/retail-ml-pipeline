@@ -1,0 +1,28 @@
+{
+  "model_name": "Random Forest (tuned)",
+  "mae": 369.8,
+  "rmse": 2399.32,
+  "r2": 0.8498,
+  "mape": 9.55,
+  "n_features": 16,
+  "n_customers": 5340,
+  "log_transform": true,
+  "features_used": [
+    "num_transactions",
+    "num_unique_invoices",
+    "avg_transaction_amount",
+    "max_transaction_amount",
+    "min_transaction_amount",
+    "std_transaction_amount",
+    "median_transaction",
+    "max_price",
+    "days_since_last_purchase",
+    "customer_lifetime_days",
+    "purchase_frequency_days",
+    "num_unique_products",
+    "num_unique_descriptions",
+    "avg_items_per_invoice",
+    "high_value_ratio",
+    "m_score"
+  ]
+}

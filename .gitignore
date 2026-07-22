@@ -1,0 +1,31 @@
+# Large data files - too big for GitHub
+online_retail_II.xlsx
+data/clean_transactions.csv
+data/customer_features.csv
+data/anomalies_report.csv
+
+# Model binary files - too big
+models/rf_regressor.pkl
+models/scaler.pkl
+
+# Keep these small JSON files
+!models/metrics.json
+!models/feature_cols.json
+!models/training_stats.json
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Environment
+.env
+*.env
+
+# Mac files
+.DS_Store
+
+# Generated outputs
+outputs/
+eda_outputs/
