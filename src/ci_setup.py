@@ -11,48 +11,83 @@ os.makedirs("models", exist_ok=True)
 os.makedirs("outputs", exist_ok=True)
 
 np.random.seed(42)
-nc = 300
+nc = 1500
+n  = 600000
+
+print(f"Generating {nc} customers...")
+
+# Generate base features
+num_transactions       = np.random.randint(1, 100, nc)
+num_unique_invoices    = (num_transactions * np.random.uniform(0.5, 1.0, nc)).astype(int).clip(1)
+avg_transaction_amount = np.random.uniform(10, 500, nc)
+max_transaction_amount = avg_transaction_amount * np.random.uniform(1.5, 5, nc)
+min_transaction_amount = avg_transaction_amount * np.random.uniform(0.1, 0.8, nc)
+std_transaction_amount = avg_transaction_amount * np.random.uniform(0.1, 0.5, nc)
+median_transaction     = avg_transaction_amount * np.random.uniform(0.8, 1.2, nc)
+max_price              = np.random.uniform(10, 100, nc)
+days_since_last        = np.random.randint(1, 365, nc)
+lifetime_days          = np.random.randint(30, 700, nc)
+freq_days              = np.random.uniform(5, 60, nc)
+num_unique_products    = np.random.randint(1, 50, nc)
+num_unique_desc        = num_unique_products + np.random.randint(0, 5, nc)
+avg_items              = np.random.uniform(1, 20, nc)
+high_value_ratio       = np.random.uniform(0, 1, nc)
+m_score                = np.random.randint(1, 6, nc)
+
+# TARGET depends realistically on features
+# More transactions + higher avg = higher spend
+total_spend = (
+    num_transactions * avg_transaction_amount * 0.8 +
+    m_score * 500 +
+    num_unique_products * 50 +
+    high_value_ratio * 2000 +
+    np.random.normal(0, 500, nc)
+).clip(lower=10)
 
 customers = pd.DataFrame({
     "Customer ID"             : range(10000, 10000+nc),
-    "total_spend"             : np.random.lognormal(7, 1, nc),
-    "num_transactions"        : np.random.randint(1, 100, nc),
-    "num_unique_invoices"     : np.random.randint(1, 50, nc),
-    "avg_transaction_amount"  : np.random.uniform(10, 500, nc),
-    "max_transaction_amount"  : np.random.uniform(100, 2000, nc),
-    "min_transaction_amount"  : np.random.uniform(1, 50, nc),
-    "std_transaction_amount"  : np.random.uniform(5, 200, nc),
-    "median_transaction"      : np.random.uniform(10, 300, nc),
-    "max_price"               : np.random.uniform(10, 100, nc),
-    "days_since_last_purchase": np.random.randint(1, 365, nc),
-    "customer_lifetime_days"  : np.random.randint(30, 700, nc),
-    "purchase_frequency_days" : np.random.uniform(5, 60, nc),
-    "num_unique_products"     : np.random.randint(1, 50, nc),
-    "num_unique_descriptions" : np.random.randint(1, 50, nc),
-    "avg_items_per_invoice"   : np.random.uniform(1, 20, nc),
-    "high_value_ratio"        : np.random.uniform(0, 1, nc),
+    "total_spend"             : total_spend,
+    "num_transactions"        : num_transactions,
+    "num_unique_invoices"     : num_unique_invoices,
+    "avg_transaction_amount"  : avg_transaction_amount,
+    "max_transaction_amount"  : max_transaction_amount,
+    "min_transaction_amount"  : min_transaction_amount,
+    "std_transaction_amount"  : std_transaction_amount,
+    "median_transaction"      : median_transaction,
+    "max_price"               : max_price,
+    "days_since_last_purchase": days_since_last,
+    "customer_lifetime_days"  : lifetime_days,
+    "purchase_frequency_days" : freq_days,
+    "num_unique_products"     : num_unique_products,
+    "num_unique_descriptions" : num_unique_desc,
+    "avg_items_per_invoice"   : avg_items,
+    "high_value_ratio"        : high_value_ratio,
     "r_score"                 : np.random.randint(1, 6, nc),
     "f_score"                 : np.random.randint(1, 6, nc),
-    "m_score"                 : np.random.randint(1, 6, nc),
+    "m_score"                 : m_score,
     "peak_shopping_month"     : np.random.randint(1, 13, nc),
-    "q4_spend"                : np.random.uniform(0, 5000, nc),
+    "q4_spend"                : total_spend * np.random.uniform(0.1, 0.4, nc),
     "q4_spend_ratio"          : np.random.uniform(0, 1, nc),
     "weekend_purchases"       : np.random.randint(0, 20, nc),
     "high_value_txn_count"    : np.random.randint(0, 20, nc),
-    "frequency"               : np.random.randint(1, 50, nc),
-    "monetary"                : np.random.lognormal(7, 1, nc),
+    "frequency"               : num_unique_invoices,
+    "monetary"                : total_spend,
     "rfm_score"               : np.random.randint(3, 16, nc),
     "weekend_ratio"           : np.random.uniform(0, 1, nc),
     "avg_day_of_week"         : np.random.uniform(0, 6, nc),
 })
 
-n = 2000
+print(f"Target stats:")
+print(f"  Min  : {total_spend.min():.0f}")
+print(f"  Max  : {total_spend.max():.0f}")
+print(f"  Mean : {total_spend.mean():.0f}")
+
 transactions = pd.DataFrame({
     "Invoice"     : [f"INV{i}" for i in range(n)],
     "StockCode"   : np.random.choice(["A1","B2","C3"], n),
     "Description" : np.random.choice(["Prod A","Prod B"], n),
     "Quantity"    : np.random.randint(1, 50, n),
-    "InvoiceDate" : pd.date_range("2010-01-01", periods=n, freq="h").astype(str),
+    "InvoiceDate" : pd.date_range("2010-01-01", periods=n, freq="1min").astype(str),
     "Price"       : np.random.uniform(1, 50, n),
     "Customer ID" : np.random.randint(10000, 18000, n),
     "Country"     : "United Kingdom",
@@ -67,7 +102,7 @@ transactions = pd.DataFrame({
 
 transactions.to_csv("data/clean_transactions.csv", index=False)
 customers.to_csv("data/customer_features.csv", index=False)
-print(f"Data generated: {nc} customers {n} transactions")
+print(f"Saved: {nc} customers {n} transactions")
 
 feature_cols = [
     "num_transactions", "num_unique_invoices",
@@ -83,23 +118,19 @@ feature_cols = [
 with open("models/feature_cols.json", "w") as f:
     json.dump(feature_cols, f, indent=2)
 
-stats = {}
-for col in feature_cols:
-    stats[col] = {
-        "mean"  : float(customers[col].mean()),
-        "std"   : float(customers[col].std()),
-        "min"   : float(customers[col].min()),
-        "max"   : float(customers[col].max()),
-        "median": float(customers[col].median())
-    }
+stats = {col: {
+    "mean"  : float(customers[col].mean()),
+    "std"   : float(customers[col].std()),
+    "min"   : float(customers[col].min()),
+    "max"   : float(customers[col].max()),
+    "median": float(customers[col].median())
+} for col in feature_cols}
 with open("models/training_stats.json", "w") as f:
     json.dump(stats, f, indent=2)
 
 print("Training model...")
-X     = customers[feature_cols]
-y     = customers["total_spend"]
+X, y  = customers[feature_cols], customers["total_spend"]
 y_log = np.log1p(y)
-
 X_tr, X_te, y_tr, y_te = train_test_split(
     X, y_log, test_size=0.2, random_state=42
 )
@@ -107,7 +138,10 @@ scaler = StandardScaler()
 X_tr_s = scaler.fit_transform(X_tr)
 X_te_s = scaler.transform(X_te)
 
-model = RandomForestRegressor(n_estimators=50, random_state=42, n_jobs=-1)
+model = RandomForestRegressor(
+    n_estimators=100, max_depth=15,
+    random_state=42, n_jobs=-1
+)
 model.fit(X_tr_s, y_tr)
 
 y_pred = np.expm1(model.predict(X_te_s))
