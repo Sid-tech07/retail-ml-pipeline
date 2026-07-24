@@ -1,8 +1,8 @@
 {
-  "mae": 1149.12,
-  "rmse": 2215.51,
-  "r2": -0.1605,
-  "mape": 73.58,
+  "mae": 1552.47,
+  "rmse": 2040.26,
+  "r2": 0.9775,
+  "mape": 7.9,
   "log_transform": true,
   "features_used": [
     "num_transactions",
